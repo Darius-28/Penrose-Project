@@ -11,7 +11,12 @@ const GameCanvas: React.FC<CanvasProps> = (props) => {
       width={800}
       height={500}
       onClick={handleClick}
-      style={{ border: '1px solid black' }}
+      style={{ 
+        border: '1px solid #00e5ff',
+        backgroundColor: '#121212',
+        borderRadius: '8px',
+        boxShadow: '0 0 20px #00e5ff'
+      }}
     />
   );
 };

@@ -1,4 +1,6 @@
 import React from 'react';
+import { Box, Button, Select, MenuItem, Typography, Paper } from '@mui/material';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import { GameControls as GameControlsProps } from '../types/game';
 
 const GameControls: React.FC<GameControlsProps> = ({
@@ -9,19 +11,42 @@ const GameControls: React.FC<GameControlsProps> = ({
   onDiskCountChange
 }) => {
   return (
-    <div className="controls">
-      <div>Moves: {moves}</div>
-      <div>Time: {time}s</div>
-      <select 
-        value={diskCount} 
+    <Paper elevation={3} sx={{ 
+      p: 3, 
+      display: 'flex', 
+      gap: 3,
+      alignItems: 'center',
+      bgcolor: 'background.paper',
+      border: '1px solid',
+      borderColor: 'primary.main',
+      boxShadow: '0 0 10px #00e5ff'
+    }}>
+      <Typography variant="h6">Moves: {moves}</Typography>
+      <Typography variant="h6">Time: {time}s</Typography>
+      <Select
+        value={diskCount}
         onChange={(e) => onDiskCountChange(Number(e.target.value))}
+        size="small"
+        sx={{ minWidth: 120 }}
       >
         {[3,4,5,6,7].map(num => (
-          <option key={num} value={num}>{num} Disks</option>
+          <MenuItem key={num} value={num}>{num} Disks</MenuItem>
         ))}
-      </select>
-      <button onClick={onReset}>Reset Game</button>
-    </div>
+      </Select>
+      <Button 
+        variant="contained" 
+        onClick={onReset}
+        startIcon={<RestartAltIcon />}
+        sx={{ 
+          boxShadow: '0 0 10px #00e5ff',
+          '&:hover': {
+            boxShadow: '0 0 20px #00e5ff'
+          }
+        }}
+      >
+        Reset Game
+      </Button>
+    </Paper>
   );
 };
 

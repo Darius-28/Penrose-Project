@@ -1,8 +1,25 @@
 import React, { useState, useEffect } from 'react';
+import { Box, Container, Typography, createTheme, ThemeProvider } from '@mui/material';
 import GameCanvas from "./GameCanvas";
 import GameControls from "./GameControls";
 import { WinModal } from "./WinModal";
 import useGameLogic from '../hooks/useGameLogic';
+
+const theme = createTheme({
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: '#00e5ff',
+    },
+    secondary: {
+      main: '#ff0099',
+    },
+    background: {
+      default: '#121212',
+      paper: '#1e1e1e',
+    },
+  },
+});
 
 const Game: React.FC = () => {
   const [diskCount, setDiskCount] = useState<number>(3);
@@ -18,13 +35,13 @@ const Game: React.FC = () => {
     setSelectedDisk
   } = useGameLogic(diskCount);
 
-  // Start timer
   useEffect(() => {
-    const timer = setInterval(() => setTime(prev => prev + 1), 1000);
-    return () => clearInterval(timer);
-  }, []);
+    if (!isGameComplete) {
+      const timer = setInterval(() => setTime(prev => prev + 1), 1000);
+      return () => clearInterval(timer);
+    }
+  }, [isGameComplete]);
 
-  // Check for win condition
   useEffect(() => {
     if (isGameComplete) {
       setShowWinModal(true);
@@ -48,7 +65,11 @@ const Game: React.FC = () => {
   const handleReset = () => {
     setShowWinModal(false);
     setTime(0);
-    setDiskCount(diskCount);
+    setSelectedDisk(null);
+    // Force a re-initialization of the game state
+    const currentDiskCount = diskCount;
+    setDiskCount(0);
+    setTimeout(() => setDiskCount(currentDiskCount), 0);
   };
 
   const handleDiskCountChange = (count: number) => {
@@ -57,35 +78,51 @@ const Game: React.FC = () => {
     setShowWinModal(false);
   };
 
-  const gameStyles: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: '20px',
-    gap: '20px'
-  };
-
   return (
-    <div style={gameStyles}>
-      <GameControls
-        moves={moves}
-        time={time}
-        diskCount={diskCount}
-        onReset={handleReset}
-        onDiskCountChange={handleDiskCountChange}
-      />
-      <GameCanvas
-        towers={towers}
-        selectedDisk={selectedDisk}
-        onDiskClick={handleDiskClick}
-      />
-      <WinModal
-        moves={moves}
-        time={time}
-        onRestart={handleReset}
-        isOpen={showWinModal}
-      />
-    </div>
+    <ThemeProvider theme={theme}>
+            <Container 
+        maxWidth="lg" 
+        sx={{ 
+          minHeight: '100vh',
+          py: 4,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 3
+        }}
+      >
+        <Typography 
+          variant="h2" 
+          color="primary"
+          sx={{
+            textShadow: '0 0 20px #00e5ff',
+            fontWeight: 'bold',
+            mb: 2
+          }}
+        >
+          Towers of Hanoi
+        </Typography>
+        
+        <GameControls
+          moves={moves}
+          time={time}
+          diskCount={diskCount}
+          onReset={handleReset}
+          onDiskCountChange={handleDiskCountChange}
+        />
+        <GameCanvas
+          towers={towers}
+          selectedDisk={selectedDisk}
+          onDiskClick={handleDiskClick}
+        />
+        <WinModal
+          moves={moves}
+          time={time}
+          onRestart={handleReset}
+          isOpen={showWinModal}
+        />
+      </Container>
+    </ThemeProvider>
   );
 };
 

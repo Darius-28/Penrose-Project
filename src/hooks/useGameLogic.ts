@@ -40,17 +40,16 @@ const useGameLogic = (diskCount: number): GameLogic => {
         const newTowers = prev.map(tower => [...tower]) as Towers;
         const disk = newTowers[fromTower].pop()!;
         newTowers[toTower].push(disk);
+        
+        // Check win condition after updating towers
+        if (newTowers[2].length === diskCount) {
+          setIsGameComplete(true);
+        }
+        
         return newTowers;
       });
       setMoves(prev => prev + 1);
-      
-      // Check win condition
-      if (towers[2].length === diskCount) {
-        setIsGameComplete(true);
-       // playSound('win');
-      }
     }
-   // playSound('move');
   };
 
   return {
