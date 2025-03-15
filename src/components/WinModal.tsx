@@ -4,7 +4,7 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 
 interface WinModalProps {
   moves: number;
-  time: number;
+  time: string;  // Changed from number to string
   onRestart: () => void;
   isOpen: boolean;
 }
@@ -34,7 +34,7 @@ export const WinModal: React.FC<WinModalProps> = ({ moves, time, onRestart, isOp
           You solved the puzzle in {moves} moves
         </Typography>
         <Typography variant="h6">
-          Time taken: {time} seconds
+          Time taken: {time}
         </Typography>
       </DialogContent>
       <DialogActions sx={{ p: 2, justifyContent: 'center' }}>

@@ -16,7 +16,7 @@ export interface GameState {
 
 export interface GameControls {
   moves: number;
-  time: number;
+  time: string;  // Changed from number to string
   diskCount: number;
   onReset: () => void;
   onDiskCountChange: (count: number) => void;
@@ -26,4 +26,11 @@ export interface CanvasProps {
   towers: Towers;
   selectedDisk: SelectedDisk | null;
   onDiskClick: (towerIndex: number) => void;
+}
+
+export interface WinModalProps {
+  moves: number;
+  time: string;
+  onRestart: () => void;
+  isOpen: boolean;
 }

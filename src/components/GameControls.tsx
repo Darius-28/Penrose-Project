@@ -22,7 +22,7 @@ const GameControls: React.FC<GameControlsProps> = ({
       boxShadow: '0 0 10px #00e5ff'
     }}>
       <Typography variant="h6">Moves: {moves}</Typography>
-      <Typography variant="h6">Time: {time}s</Typography>
+      <Typography variant="h6">Time: {time}</Typography>
       <Select
         value={diskCount}
         onChange={(e) => onDiskCountChange(Number(e.target.value))}
