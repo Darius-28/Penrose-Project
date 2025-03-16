@@ -61,18 +61,9 @@ const Game: React.FC = () => {
     }
   }, [isGameComplete]);
 
-  const handleDiskClick = (towerIndex: number) => {
-    if (selectedDisk === null) {
-      if (towers[towerIndex].length > 0) {
-        setSelectedDisk({
-          tower: towerIndex,
-          disk: towers[towerIndex][towers[towerIndex].length - 1],
-        });
-      }
-    } else {
-      moveDisk(selectedDisk.tower, towerIndex);
-      setSelectedDisk(null);
-    }
+  const handleDiskMove = (fromTower: number, toTower: number) => {
+    moveDisk(fromTower, toTower);
+    setSelectedDisk(null);
   };
 
   const handleReset = () => {
@@ -89,6 +80,7 @@ const Game: React.FC = () => {
     setDiskCount(count);
     setTime(0);
     setShowWinModal(false);
+    setSelectedDisk(null);
   };
 
   return (
@@ -126,7 +118,7 @@ const Game: React.FC = () => {
         <GameCanvas
           towers={towers}
           selectedDisk={selectedDisk}
-          onDiskClick={handleDiskClick}
+          onDiskMove={handleDiskMove}
         />
         <WinModal
           moves={moves}

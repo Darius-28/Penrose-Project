@@ -23,9 +23,9 @@ export interface GameControls {
 }
 
 export interface CanvasProps {
-  towers: Towers;
+  towers: number[][];
   selectedDisk: SelectedDisk | null;
-  onDiskClick: (towerIndex: number) => void;
+  onDiskMove: (fromTower: number, toTower: number) => void;
 }
 
 export interface WinModalProps {
