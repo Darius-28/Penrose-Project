@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Button, Select, MenuItem, Typography, Paper } from '@mui/material';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import UndoIcon from '@mui/icons-material/Undo';
 import { GameControls as GameControlsProps } from '../types/game';
 
 const GameControls: React.FC<GameControlsProps> = ({
@@ -8,7 +9,9 @@ const GameControls: React.FC<GameControlsProps> = ({
   time,
   diskCount,
   onReset,
-  onDiskCountChange
+  onDiskCountChange,
+  onUndo,
+  canUndo
 }) => {
   return (
     <Paper elevation={3} sx={{ 
@@ -33,6 +36,20 @@ const GameControls: React.FC<GameControlsProps> = ({
           <MenuItem key={num} value={num}>{num} Disks</MenuItem>
         ))}
       </Select>
+      <Button 
+        variant="contained" 
+        onClick={onUndo}
+        disabled={!canUndo}
+        startIcon={<UndoIcon />}
+        sx={{ 
+          boxShadow: '0 0 10px #00e5ff',
+          '&:hover': {
+            boxShadow: '0 0 20px #00e5ff'
+          }
+        }}
+      >
+        Undo
+      </Button>
       <Button 
         variant="contained" 
         onClick={onReset}

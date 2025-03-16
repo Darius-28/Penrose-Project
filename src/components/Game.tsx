@@ -9,7 +9,9 @@ import {
 import GameCanvas from "./GameCanvas";
 import GameControls from "./GameControls";
 import { WinModal } from "./WinModal";
+import { SplashScreen } from "./SplashScreen";
 import useGameLogic from "../hooks/useGameLogic";
+import { GameSettings, GameMode, Difficulty } from "../types/game";
 
 const theme = createTheme({
   palette: {
@@ -28,9 +30,20 @@ const theme = createTheme({
 });
 
 const Game: React.FC = () => {
+  const [gameSettings, setGameSettings] = useState<GameSettings | null>(null);
   const [diskCount, setDiskCount] = useState<number>(3);
   const [time, setTime] = useState<number>(0);
   const [showWinModal, setShowWinModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (gameSettings) {
+      if (gameSettings.mode === GameMode.Normal && gameSettings.difficulty) {
+        setDiskCount(gameSettings.difficulty);
+      } else if (gameSettings.mode === GameMode.Dynamic) {
+        setDiskCount(Difficulty.Easy); // Start with Easy for Dynamic mode
+      }
+    }
+  }, [gameSettings]);
 
   const {
     towers,
@@ -39,14 +52,9 @@ const Game: React.FC = () => {
     isGameComplete,
     moveDisk,
     setSelectedDisk,
+    undoLastMove,
+    canUndo
   } = useGameLogic(diskCount);
-
-  const formatTime = (seconds: number): string => {
-    if (seconds < 60) return `${seconds}s`;
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}m ${remainingSeconds}s`;
-  };
 
   useEffect(() => {
     if (!isGameComplete) {
@@ -61,6 +69,13 @@ const Game: React.FC = () => {
     }
   }, [isGameComplete]);
 
+  const formatTime = (seconds: number): string => {
+    if (seconds < 60) return `${seconds}s`;
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}m ${remainingSeconds}s`;
+  };
+
   const handleDiskMove = (fromTower: number, toTower: number) => {
     moveDisk(fromTower, toTower);
     setSelectedDisk(null);
@@ -70,18 +85,29 @@ const Game: React.FC = () => {
     setShowWinModal(false);
     setTime(0);
     setSelectedDisk(null);
-    // Force a re-initialization of the game state
     const currentDiskCount = diskCount;
     setDiskCount(0);
     setTimeout(() => setDiskCount(currentDiskCount), 0);
   };
 
   const handleDiskCountChange = (count: number) => {
-    setDiskCount(count);
-    setTime(0);
-    setShowWinModal(false);
-    setSelectedDisk(null);
+    if (gameSettings?.mode === GameMode.Arcade) {
+      setDiskCount(count);
+      setTime(0);
+      setShowWinModal(false);
+      setSelectedDisk(null);
+    }
   };
+
+  if (!gameSettings) {
+    return (
+      <ThemeProvider theme={theme}>
+        <Container maxWidth="lg" sx={{ minHeight: "100vh", py: 4 }}>
+          <SplashScreen onStart={setGameSettings} />
+        </Container>
+      </ThemeProvider>
+    );
+  }
 
   return (
     <ThemeProvider theme={theme}>
@@ -114,6 +140,10 @@ const Game: React.FC = () => {
           diskCount={diskCount}
           onReset={handleReset}
           onDiskCountChange={handleDiskCountChange}
+          onUndo={undoLastMove}
+          canUndo={canUndo}
+          gameMode={gameSettings.mode}
+          playerName={gameSettings.playerName}
         />
         <GameCanvas
           towers={towers}
@@ -125,6 +155,11 @@ const Game: React.FC = () => {
           time={formatTime(time)}
           onRestart={handleReset}
           isOpen={showWinModal}
+          gameMode={gameSettings.mode}
+          playerName={gameSettings.playerName}
+          difficulty={gameSettings.difficulty}
+          optimalMoves={Math.pow(2, diskCount) - 1}
+          moveEfficiency={(Math.pow(2, diskCount) - 1) / moves}
         />
       </Container>
     </ThemeProvider>
