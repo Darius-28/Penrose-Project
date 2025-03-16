@@ -11,7 +11,8 @@ import GameControls from "./GameControls";
 import { WinModal } from "./WinModal";
 import { SplashScreen } from "./SplashScreen";
 import useGameLogic from "../hooks/useGameLogic";
-import { GameSettings, GameMode, Difficulty } from "../types/game";
+import { GameSettings, GameMode, Difficulty, GameResult } from "../types/game";
+import { gameService } from "../services/gameService";
 
 const theme = createTheme({
   palette: {
@@ -40,7 +41,7 @@ const Game: React.FC = () => {
       if (gameSettings.mode === GameMode.Normal && gameSettings.difficulty) {
         setDiskCount(gameSettings.difficulty);
       } else if (gameSettings.mode === GameMode.Dynamic) {
-        setDiskCount(Difficulty.Easy); // Start with Easy for Dynamic mode
+        setDiskCount(Difficulty.Easy);
       }
     }
   }, [gameSettings]);
@@ -64,10 +65,29 @@ const Game: React.FC = () => {
   }, [isGameComplete]);
 
   useEffect(() => {
-    if (isGameComplete) {
+    if (isGameComplete && gameSettings) {
+      const result: GameResult = {
+        difficulty: gameSettings.difficulty || Difficulty.Easy,
+        moves,
+        time,
+        completedAt: new Date(),
+        optimalMoves: Math.pow(2, diskCount) - 1,
+        moveEfficiency: (Math.pow(2, diskCount) - 1) / moves,
+        gameMode: gameSettings.mode
+      };
+  
       setShowWinModal(true);
+  
+      if (gameSettings.mode !== GameMode.Arcade) {
+        try {
+          gameService.saveGameResult(gameSettings.playerName, result)
+            .catch(error => console.error('Failed to save game result:', error));
+        } catch (error) {
+          console.error('Error saving game result:', error);
+        }
+      }
     }
-  }, [isGameComplete]);
+  }, [isGameComplete, gameSettings, moves, time, diskCount]);
 
   const formatTime = (seconds: number): string => {
     if (seconds < 60) return `${seconds}s`;

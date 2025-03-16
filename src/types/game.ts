@@ -41,10 +41,10 @@ export interface GameResult {
   moves: number;
   time: number;
   completedAt: Date;
-  optimalMoves: number; // 2^n - 1, where n is the number of disks
-  moveEfficiency: number; // optimalMoves / actualMoves, ranges from 0 to 1
+  optimalMoves: number;
+  moveEfficiency: number;
+  gameMode: GameMode;
 }
-
 export interface GameSettings {
   mode: GameMode;
   playerName: string;
