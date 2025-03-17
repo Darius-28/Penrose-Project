@@ -1,8 +1,6 @@
 import React from 'react';
-import { Box, Button, Select, MenuItem, Typography, Paper } from '@mui/material';
-import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import UndoIcon from '@mui/icons-material/Undo';
-import { GameControls as GameControlsProps } from '../types/game';
+import { Box, Button, Typography, Slider } from '@mui/material';
+import { GameControls as GameControlsProps, GameMode } from '../types/game';
 
 const GameControls: React.FC<GameControlsProps> = ({
   moves,
@@ -11,59 +9,133 @@ const GameControls: React.FC<GameControlsProps> = ({
   onReset,
   onDiskCountChange,
   onUndo,
-  canUndo
+  onBackToMenu,
+  canUndo,
+  gameMode,
+  playerName,
+  difficulty
 }) => {
+
+  const getDifficultyName = (diff: number): string => {
+    switch (diff) {
+      case 3: return 'Easy';
+      case 4: return 'Medium';
+      case 5: return 'Hard';
+      case 6: return 'Expert';
+      case 7: return 'Master';
+      default: return 'Unknown';
+    }
+  };
   return (
-    <Paper elevation={3} sx={{ 
-      p: 3, 
-      display: 'flex', 
-      gap: 3,
-      alignItems: 'center',
-      bgcolor: 'background.paper',
-      border: '1px solid',
-      borderColor: 'primary.main',
-      boxShadow: '0 0 10px #00e5ff'
-    }}>
-      <Typography variant="h6">Moves: {moves}</Typography>
-      <Typography variant="h6">Time: {time}</Typography>
-      <Select
-        value={diskCount}
-        onChange={(e) => onDiskCountChange(Number(e.target.value))}
-        size="small"
-        sx={{ minWidth: 120 }}
-      >
-        {[3,4,5,6,7].map(num => (
-          <MenuItem key={num} value={num}>{num} Disks</MenuItem>
-        ))}
-      </Select>
-      <Button 
-        variant="contained" 
-        onClick={onUndo}
-        disabled={!canUndo}
-        startIcon={<UndoIcon />}
-        sx={{ 
-          boxShadow: '0 0 10px #00e5ff',
-          '&:hover': {
-            boxShadow: '0 0 20px #00e5ff'
-          }
-        }}
-      >
-        Undo
-      </Button>
-      <Button 
-        variant="contained" 
-        onClick={onReset}
-        startIcon={<RestartAltIcon />}
-        sx={{ 
-          boxShadow: '0 0 10px #00e5ff',
-          '&:hover': {
-            boxShadow: '0 0 20px #00e5ff'
-          }
-        }}
-      >
-        Reset Game
-      </Button>
-    </Paper>
+    <Box sx={{ width: '100%', maxWidth: 600, mb: 2 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        mb: 2,
+      }}>
+        <Typography>
+          <Box component="span" sx={{ color: 'secondary.main', textShadow: '0 0 10px #ff0099', fontWeight: 'bold' }}>
+            Player:&nbsp;
+          </Box>
+          <Box component="span" sx={{ color: 'primary.main', textShadow: '0 0 10px #00e5ff', fontWeight: 'bold' }}>
+            {playerName}
+          </Box>
+        </Typography>
+        <Typography>
+          <Box component="span" sx={{ color: 'secondary.main', textShadow: '0 0 10px #ff0099', fontWeight: 'bold' }}>
+            Mode:&nbsp;
+          </Box>
+          <Box component="span" sx={{ color: 'primary.main', textShadow: '0 0 10px #00e5ff', fontWeight: 'bold' }}>
+            {gameMode}
+          </Box>
+        </Typography>
+        {(gameMode === GameMode.Normal || gameMode === GameMode.Dynamic) && difficulty && (
+          <Typography>
+            <Box component="span" sx={{ color: 'secondary.main', textShadow: '0 0 10px #ff0099', fontWeight: 'bold' }}>
+              Difficulty:&nbsp;
+            </Box>
+            <Box component="span" sx={{ color: 'primary.main', textShadow: '0 0 10px #00e5ff', fontWeight: 'bold' }}>
+              {getDifficultyName(difficulty)}
+            </Box>
+          </Typography>
+        )}
+        <Typography>
+          <Box component="span" sx={{ color: 'secondary.main', textShadow: '0 0 10px #ff0099', fontWeight: 'bold' }}>
+            Moves:&nbsp;
+          </Box>
+          <Box component="span" sx={{ color: 'primary.main', textShadow: '0 0 10px #00e5ff', fontWeight: 'bold' }}>
+            {moves}
+          </Box>
+        </Typography>
+        <Typography>
+          <Box component="span" sx={{ color: 'secondary.main', textShadow: '0 0 10px #ff0099', fontWeight: 'bold' }}>
+            Time:&nbsp;
+          </Box>
+          <Box component="span" sx={{ color: 'primary.main', textShadow: '0 0 10px #00e5ff', fontWeight: 'bold' }}>
+            {time}
+          </Box>
+        </Typography>
+      </Box>
+      
+      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+        <Button
+          onClick={onBackToMenu}
+          variant="outlined"
+          color="secondary"
+          sx={{
+            boxShadow: '0 0 10px #ff0099',
+            '&:hover': {
+              boxShadow: '0 0 20px #ff0099'
+            }
+          }}
+        >
+          Back to Menu
+        </Button>
+        
+        <Button
+          onClick={onReset}
+          variant="contained"
+          sx={{
+            boxShadow: '0 0 10px #00e5ff',
+            '&:hover': {
+              boxShadow: '0 0 20px #00e5ff'
+            }
+          }}
+        >
+          Reset Game
+        </Button>
+
+        <Button
+          onClick={onUndo}
+          disabled={!canUndo}
+          variant="contained"
+          color="secondary"
+        >
+          Undo Move
+        </Button>
+      </Box>
+
+      {gameMode === GameMode.Arcade && (
+        <Box sx={{ mt: 2 }}>
+          <Typography gutterBottom>
+            <Box component="span" sx={{ color: 'secondary.main', textShadow: '0 0 10px #ff0099', fontWeight: 'bold' }}>
+              Number of Disks:&nbsp;
+            </Box>
+            <Box component="span" sx={{ color: 'primary.main', textShadow: '0 0 10px #00e5ff', fontWeight: 'bold' }}>
+              {diskCount}
+            </Box>
+          </Typography>
+          <Slider
+            value={diskCount}
+            onChange={(_, value) => onDiskCountChange(value as number)}
+            min={3}
+            max={8}
+            marks
+            step={1}
+          />
+        </Box>
+      )}
+    </Box>
   );
 };
 

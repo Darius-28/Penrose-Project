@@ -15,9 +15,9 @@ export interface GameState {
 }
 
 export enum GameMode {
-  Arcade = 'arcade',
-  Normal = 'normal',
-  Dynamic = 'dynamic'
+  Arcade = 'Arcade',
+  Normal = 'Normal',
+  Dynamic = 'Dynamic'
 }
 
 export enum Difficulty {
@@ -64,9 +64,11 @@ export interface GameControls {
   onReset: () => void;
   onDiskCountChange: (count: number) => void;
   onUndo: () => void;
+  onBackToMenu: () => void;  // Add this line
   canUndo: boolean;
   gameMode: GameMode;
   playerName: string;
+  difficulty?: Difficulty; 
 }
 
 export interface CanvasProps {
@@ -79,6 +81,7 @@ export interface WinModalProps {
   moves: number;
   time: string;
   onRestart: () => void;
+  onBackToMenu: () => void; 
   isOpen: boolean;
   gameMode: GameMode;
   playerName: string;

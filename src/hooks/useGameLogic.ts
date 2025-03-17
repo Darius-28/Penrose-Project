@@ -9,6 +9,7 @@ interface GameLogic {
   moveDisk: (fromTower: number, toTower: number) => void;
   isValidMove: (fromTower: number, toTower: number) => boolean;
   isGameComplete: boolean;
+  setIsGameComplete: (value: boolean) => void;
   undoLastMove: () => void;
   canUndo: boolean;
 }
@@ -52,9 +53,11 @@ const useGameLogic = (diskCount: number): GameLogic => {
       setMoves(prev => prev + 1);
       
       // Check win condition after the move
-      if (towers[2].length + 1 === diskCount) {
-        setIsGameComplete(true);
-      }
+      setTimeout(() => {
+        if (towers[2].length + 1 === diskCount) {
+          setIsGameComplete(true);
+        }
+      }, 0);
     }
   };
 
@@ -83,6 +86,7 @@ const useGameLogic = (diskCount: number): GameLogic => {
     moveDisk,
     isValidMove,
     isGameComplete,
+    setIsGameComplete,
     undoLastMove,
     canUndo: moveHistory.length > 0 && moves > 0
   };

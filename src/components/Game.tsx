@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  Box,
   Container,
   Typography,
   createTheme,
@@ -51,11 +50,21 @@ const Game: React.FC = () => {
     moves,
     selectedDisk,
     isGameComplete,
+    setIsGameComplete,
     moveDisk,
     setSelectedDisk,
     undoLastMove,
-    canUndo
+    canUndo,
   } = useGameLogic(diskCount);
+
+  const handleBackToMenu = () => {
+    setGameSettings(null);
+    setShowWinModal(false);
+    setTime(0);
+    setSelectedDisk(null);
+    setDiskCount(3);
+    setIsGameComplete(false);
+  };
 
   useEffect(() => {
     if (!isGameComplete) {
@@ -73,18 +82,17 @@ const Game: React.FC = () => {
         completedAt: new Date(),
         optimalMoves: Math.pow(2, diskCount) - 1,
         moveEfficiency: (Math.pow(2, diskCount) - 1) / moves,
-        gameMode: gameSettings.mode
+        gameMode: gameSettings.mode,
       };
-  
+
       setShowWinModal(true);
-  
+
       if (gameSettings.mode !== GameMode.Arcade) {
-        try {
-          gameService.saveGameResult(gameSettings.playerName, result)
-            .catch(error => console.error('Failed to save game result:', error));
-        } catch (error) {
-          console.error('Error saving game result:', error);
-        }
+        gameService
+          .saveGameResult(gameSettings.playerName, result)
+          .catch((error) =>
+            console.error("Failed to save game result:", error)
+          );
       }
     }
   }, [isGameComplete, gameSettings, moves, time, diskCount]);
@@ -105,6 +113,7 @@ const Game: React.FC = () => {
     setShowWinModal(false);
     setTime(0);
     setSelectedDisk(null);
+    setIsGameComplete(false);
     const currentDiskCount = diskCount;
     setDiskCount(0);
     setTimeout(() => setDiskCount(currentDiskCount), 0);
@@ -116,6 +125,7 @@ const Game: React.FC = () => {
       setTime(0);
       setShowWinModal(false);
       setSelectedDisk(null);
+      setIsGameComplete(false);
     }
   };
 
@@ -161,9 +171,11 @@ const Game: React.FC = () => {
           onReset={handleReset}
           onDiskCountChange={handleDiskCountChange}
           onUndo={undoLastMove}
+          onBackToMenu={handleBackToMenu}
           canUndo={canUndo}
           gameMode={gameSettings.mode}
           playerName={gameSettings.playerName}
+          difficulty={gameSettings.difficulty}
         />
         <GameCanvas
           towers={towers}
@@ -174,6 +186,7 @@ const Game: React.FC = () => {
           moves={moves}
           time={formatTime(time)}
           onRestart={handleReset}
+          onBackToMenu={handleBackToMenu}
           isOpen={showWinModal}
           gameMode={gameSettings.mode}
           playerName={gameSettings.playerName}

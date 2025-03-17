@@ -8,19 +8,21 @@ function App() {
       minHeight: '100vh',
       margin: 0,
       padding: 0,
-      backgroundImage: 'url("images/background.png")', // assuming your image is named background.jpg
+      backgroundImage: 'url("images/background.png")',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
+      position: 'relative',
       '&::before': {
         content: '""',
-        position: 'absolute',
+        position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(18, 18, 18, 0.8)', // dark overlay
-        zIndex: 1
+        backgroundColor: 'rgba(18, 18, 18, 0.8)',
+        zIndex: 1,
+        minHeight: '200vh'
       }
     }}>
       <CssBaseline />
