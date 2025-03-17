@@ -91,6 +91,7 @@ export interface WinModalProps {
 }
 
 export interface LeaderboardEntry extends GameResult {
+  id: string;
   playerName: string;
 }
 

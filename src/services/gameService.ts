@@ -9,45 +9,56 @@ import {
     doc,
     getDoc,
     updateDoc,
-    DocumentData
+    DocumentData,
+    serverTimestamp
   } from 'firebase/firestore';
   import { db } from './firebase';
-  import { GameResult, PlayerStats, GameMode, Difficulty } from '../types/game';
+  import { GameResult, PlayerStats, GameMode, Difficulty, LeaderboardEntry } from '../types/game';
   
   class GameService {
     async saveGameResult(playerName: string, result: GameResult) {
-      try {
-        const playerRef = await this.getOrCreatePlayer(playerName);
-        
-        await addDoc(collection(db, 'gameResults'), {
-          ...result,
-          playerName,
-          timestamp: new Date()
-        });
-  
-        await this.updatePlayerStats(playerRef.id, result);
-      } catch (error) {
-        console.error('Error saving game result:', error);
-        throw error;
+        try {
+          const docRef = await addDoc(collection(db, 'gameResults'), {
+            playerName,
+            ...result,
+            completedAt: serverTimestamp()
+          });
+          return docRef.id;
+        } catch (error) {
+          console.error('Error saving game result:', error);
+          throw error;
+        }
       }
-    }
-  
-    async getLeaderboard(difficulty: Difficulty, limitCount = 10) {
-      const q = query(
-        collection(db, 'gameResults'),
-        where('difficulty', '==', difficulty),
-        where('gameMode', '==', GameMode.Normal),
-        orderBy('moveEfficiency', 'desc'),
-        orderBy('time'),
-        limit(limitCount)
-      );
-  
-      const snapshot = await getDocs(q);
-      return snapshot.docs.map((doc: DocumentData) => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-    }
+      
+      async getLeaderboard(difficulty: Difficulty, limitCount = 10): Promise<LeaderboardEntry[]> {
+        try {
+          const q = query(
+            collection(db, 'gameResults'),
+            where('difficulty', '==', difficulty),
+            where('gameMode', '==', GameMode.Normal),
+            limit(limitCount)
+          );
+        
+          const snapshot = await getDocs(q);
+          const results = snapshot.docs.map(doc => ({
+            id: doc.id,
+            playerName: doc.data().playerName,
+            difficulty: doc.data().difficulty,
+            moves: doc.data().moves,
+            time: doc.data().time,
+            completedAt: doc.data().completedAt?.toDate() || new Date(),
+            optimalMoves: doc.data().optimalMoves,
+            moveEfficiency: doc.data().moveEfficiency,
+            gameMode: doc.data().gameMode
+          }));
+      
+          // Sort results in memory instead of using orderBy
+          return results.sort((a, b) => a.moves - b.moves);
+        } catch (error) {
+          console.error('Error fetching leaderboard:', error);
+          return [];
+        }
+      }
   
     async getPlayerStats(playerName: string): Promise<PlayerStats | null> {
       const q = query(

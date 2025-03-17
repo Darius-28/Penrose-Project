@@ -21,7 +21,8 @@ const useGameLogic = (diskCount: number): GameLogic => {
   const [isGameComplete, setIsGameComplete] = useState<boolean>(false);
   const [moveHistory, setMoveHistory] = useState<Move[]>([]);
 
-  useEffect(() => {
+  // Add a reset function
+  const resetGame = () => {
     const initialTower = Array.from(
       { length: diskCount }, 
       (_, i) => diskCount - i
@@ -30,35 +31,62 @@ const useGameLogic = (diskCount: number): GameLogic => {
     setMoves(0);
     setIsGameComplete(false);
     setMoveHistory([]);
+    setSelectedDisk(null);
+  };
+
+  useEffect(() => {
+    if (diskCount > 0) {
+      resetGame();
+    }
   }, [diskCount]);
 
   const isValidMove = (fromTower: number, toTower: number): boolean => {
+    if (fromTower === toTower || towers[fromTower].length === 0) {
+      return false;
+    }
+
     const fromDisk = towers[fromTower][towers[fromTower].length - 1];
-    const toDisk = towers[toTower][towers[toTower].length - 1];
-    return !toDisk || fromDisk < toDisk;
+    const destinationTower = towers[toTower];
+
+    if (destinationTower.length === 0) {
+      return true;
+    }
+
+    const topDisk = destinationTower[destinationTower.length - 1];
+    return fromDisk < topDisk;
+  };
+
+  const checkWinCondition = (currentTowers: Towers): boolean => {
+    const lastTower = currentTowers[2];
+    if (lastTower.length !== diskCount) return false;
+
+    for (let i = 0; i < lastTower.length - 1; i++) {
+      if (lastTower[i] < lastTower[i + 1]) {
+        return false;
+      }
+    }
+    return true;
   };
 
   const moveDisk = (fromTower: number, toTower: number): void => {
-    if (isValidMove(fromTower, toTower)) {
-      const disk = towers[fromTower][towers[fromTower].length - 1];
-      
-      setTowers(prev => {
-        const newTowers = prev.map(tower => [...tower]) as Towers;
-        newTowers[fromTower].pop();
-        newTowers[toTower].push(disk);
-        return newTowers;
-      });
-      
-      setMoveHistory(prev => [...prev, { fromTower, toTower, disk }]);
-      setMoves(prev => prev + 1);
-      
-      // Check win condition after the move
-      setTimeout(() => {
-        if (towers[2].length + 1 === diskCount) {
-          setIsGameComplete(true);
-        }
-      }, 0);
-    }
+    if (!isValidMove(fromTower, toTower)) return;
+
+    const disk = towers[fromTower][towers[fromTower].length - 1];
+    
+    setTowers(prev => {
+      const newTowers = prev.map(tower => [...tower]) as Towers;
+      newTowers[fromTower].pop();
+      newTowers[toTower].push(disk);
+
+      if (checkWinCondition(newTowers)) {
+        setTimeout(() => setIsGameComplete(true), 0);
+      }
+
+      return newTowers;
+    });
+
+    setMoveHistory(prev => [...prev, { fromTower, toTower, disk }]);
+    setMoves(prev => prev + 1);
   };
 
   const undoLastMove = () => {
