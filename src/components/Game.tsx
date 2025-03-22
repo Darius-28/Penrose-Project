@@ -106,6 +106,8 @@ const Game: React.FC = () => {
     setSelectedDisk,
     undoLastMove,
     canUndo,
+    setTowers,
+    setMoves,
   } = useGameLogic(diskCount);
 
   const handleBackToMenu = () => {
@@ -211,17 +213,19 @@ const toggleSound = () => {
   };
 
   const handleReset = async () => {
+    // Reset all game states
     setShowWinModal(false);
     setTime(0);
     setSelectedDisk(null);
     setIsGameComplete(false);
-
+    setMoves(0);
+    setHint(null);
+  
+    // Handle dynamic mode reset
     if (gameSettings?.mode === GameMode.Dynamic) {
       try {
-        const player = await gameService.getOrCreatePlayer(
-          gameSettings.playerName
-        );
-
+        const player = await gameService.getOrCreatePlayer(gameSettings.playerName);
+  
         if (isGameComplete) {
           await gameService.updatePlayerStats(player.id, {
             difficulty: diskCount as Difficulty,
@@ -232,24 +236,45 @@ const toggleSound = () => {
             moveEfficiency: (Math.pow(2, diskCount) - 1) / moves,
             gameMode: GameMode.Dynamic,
           });
-
-          const updatedStats = await gameService.getPlayerStats(
-            gameSettings.playerName
-          );
+  
+          const updatedStats = await gameService.getPlayerStats(gameSettings.playerName);
           if (updatedStats) {
+            // Reset disk count with updated difficulty
             setDiskCount(0);
             setTimeout(() => setDiskCount(updatedStats.currentDifficulty), 0);
+  
+            // Reset towers after difficulty update
+            const newDiskCount = updatedStats.currentDifficulty;
+            const initialTower = Array.from(
+              { length: newDiskCount }, 
+              (_, i) => newDiskCount - i
+            );
+            setTowers([initialTower, [], []]);
             return;
           }
+        }
+  
+        // If not complete, reset with current difficulty
+        const playerStats = await gameService.getPlayerStats(gameSettings.playerName);
+        if (playerStats) {
+          setDiskCount(playerStats.currentDifficulty);
         }
       } catch (error) {
         console.error("Error updating dynamic difficulty:", error);
       }
     }
-
+  
+    // Reset for non-dynamic modes
     const currentDiskCount = diskCount;
     setDiskCount(0);
-    setTimeout(() => setDiskCount(currentDiskCount), 0);
+    setTimeout(() => {
+      setDiskCount(currentDiskCount);
+      const initialTower = Array.from(
+        { length: currentDiskCount }, 
+        (_, i) => currentDiskCount - i
+      );
+      setTowers([initialTower, [], []]);
+    }, 0);
   };
 
   const handleDiskCountChange = (count: number) => {

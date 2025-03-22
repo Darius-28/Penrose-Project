@@ -13,6 +13,8 @@ interface GameLogic {
   setIsGameComplete: (value: boolean) => void;
   undoLastMove: () => void;
   canUndo: boolean;
+  setTowers: React.Dispatch<React.SetStateAction<Towers>>;
+  setMoves: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const useGameLogic = (diskCount: number): GameLogic => {
@@ -121,7 +123,9 @@ const useGameLogic = (diskCount: number): GameLogic => {
     isGameComplete,
     setIsGameComplete,
     undoLastMove,
-    canUndo: moveHistory.length > 0 && moves > 0
+    canUndo: moveHistory.length > 0 && moves > 0,
+    setTowers,
+    setMoves,
   };
 };
 
