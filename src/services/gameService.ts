@@ -3,13 +3,11 @@ import {
     addDoc, 
     query, 
     where, 
-    orderBy, 
     limit, 
     getDocs,
     doc,
     getDoc,
     updateDoc,
-    DocumentData,
     serverTimestamp
   } from 'firebase/firestore';
   import { db } from './firebase';
@@ -32,11 +30,11 @@ import {
       
     async getLeaderboard(difficulty: Difficulty, limitCount = 10): Promise<LeaderboardEntry[]> {
       try {
+        // Get all results for this difficulty
         const q = query(
           collection(db, 'gameResults'),
           where('difficulty', '==', difficulty),
-          where('gameMode', '==', GameMode.Normal),
-          limit(limitCount)
+          where('gameMode', '==', GameMode.Normal)
         );
       
         const snapshot = await getDocs(q);
@@ -52,13 +50,28 @@ import {
           gameMode: doc.data().gameMode
         }));
     
-        // Sort first by moves, then by time
-        return results.sort((a, b) => {
-          if (a.moves !== b.moves) {
-            return a.moves - b.moves;
-          }
-          return a.time - b.time;
-        });
+        // Group by player and keep best result
+        const bestResults = Object.values(
+          results.reduce((acc, result) => {
+            const existing = acc[result.playerName];
+            if (!existing || 
+                result.moves < existing.moves || 
+                (result.moves === existing.moves && result.time < existing.time)) {
+              acc[result.playerName] = result;
+            }
+            return acc;
+          }, {} as { [key: string]: LeaderboardEntry })
+        );
+    
+        // Sort and limit results
+        return bestResults
+          .sort((a, b) => {
+            if (a.moves !== b.moves) {
+              return a.moves - b.moves;
+            }
+            return a.time - b.time;
+          })
+          .slice(0, limitCount);
       } catch (error) {
         console.error('Error fetching leaderboard:', error);
         return [];

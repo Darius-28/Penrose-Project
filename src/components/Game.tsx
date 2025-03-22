@@ -7,14 +7,21 @@ import {
   Box,
   IconButton,
 } from "@mui/material";
-import LeaderboardIcon from '@mui/icons-material/Leaderboard';
+import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import GameCanvas from "./GameCanvas";
 import GameControls from "./GameControls";
 import { WinModal } from "./WinModal";
 import { SplashScreen } from "./SplashScreen";
 import { Leaderboard } from "./Leaderboard";
 import useGameLogic from "../hooks/useGameLogic";
-import { GameSettings, GameMode, Difficulty, GameResult, LeaderboardEntry, Move } from "../types/game";
+import {
+  GameSettings,
+  GameMode,
+  Difficulty,
+  GameResult,
+  LeaderboardEntry,
+  Move,
+} from "../types/game";
 import { gameService } from "../services/gameService";
 import { aiService } from "../services/aiService";
 
@@ -40,7 +47,9 @@ const Game: React.FC = () => {
   const [time, setTime] = useState<number>(0);
   const [showWinModal, setShowWinModal] = useState<boolean>(false);
   const [showLeaderboard, setShowLeaderboard] = useState<boolean>(false);
-  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>(
+    []
+  );
   const [hint, setHint] = useState<Move | null>(null);
 
   useEffect(() => {
@@ -52,29 +61,35 @@ const Game: React.FC = () => {
       setIsGameComplete(false);
       setShowLeaderboard(false);
       setDiskCount(0);
-      
+
       // Sets new disk counts for dynamic mode
       const timer = setTimeout(async () => {
         if (gameSettings.mode === GameMode.Dynamic) {
           try {
-            const player = await gameService.getOrCreatePlayer(gameSettings.playerName);
-            const stats = await gameService.getPlayerStats(gameSettings.playerName);
+            const player = await gameService.getOrCreatePlayer(
+              gameSettings.playerName
+            );
+            const stats = await gameService.getPlayerStats(
+              gameSettings.playerName
+            );
             setDiskCount(stats?.currentDifficulty || Difficulty.Easy);
           } catch (error) {
             console.error("Error fetching player stats:", error);
             setDiskCount(Difficulty.Easy);
           }
-        } else if (gameSettings.mode === GameMode.Normal && gameSettings.difficulty) {
+        } else if (
+          gameSettings.mode === GameMode.Normal &&
+          gameSettings.difficulty
+        ) {
           setDiskCount(Number(gameSettings.difficulty));
         } else {
           setDiskCount(3);
         }
       }, 100);
-  
+
       return () => clearTimeout(timer);
     }
   }, [gameSettings]);
-
 
   const {
     towers,
@@ -109,7 +124,8 @@ const Game: React.FC = () => {
   // Effect for fetching leaderboard data
   useEffect(() => {
     if (gameSettings?.mode === GameMode.Normal && gameSettings.difficulty) {
-      gameService.getLeaderboard(gameSettings.difficulty)
+      gameService
+        .getLeaderboard(gameSettings.difficulty)
         .then(setLeaderboardData)
         .catch(console.error);
     }
@@ -119,7 +135,7 @@ const Game: React.FC = () => {
   useEffect(() => {
     if (isGameComplete && gameSettings) {
       const result: GameResult = {
-        difficulty: gameSettings.difficulty || diskCount as Difficulty,
+        difficulty: gameSettings.difficulty || (diskCount as Difficulty),
         moves,
         time,
         completedAt: new Date(),
@@ -127,9 +143,9 @@ const Game: React.FC = () => {
         moveEfficiency: (Math.pow(2, diskCount) - 1) / moves,
         gameMode: gameSettings.mode,
       };
-  
+
       setShowWinModal(true);
-  
+
       if (gameSettings.mode === GameMode.Normal) {
         gameService
           .saveGameResult(gameSettings.playerName, result)
@@ -139,7 +155,7 @@ const Game: React.FC = () => {
       } else if (gameSettings.mode === GameMode.Dynamic) {
         gameService
           .getOrCreatePlayer(gameSettings.playerName)
-          .then(player => gameService.updatePlayerStats(player.id, result))
+          .then((player) => gameService.updatePlayerStats(player.id, result))
           .catch(console.error);
       }
     }
@@ -167,8 +183,10 @@ const Game: React.FC = () => {
 
     if (gameSettings?.mode === GameMode.Dynamic) {
       try {
-        const player = await gameService.getOrCreatePlayer(gameSettings.playerName);
-        
+        const player = await gameService.getOrCreatePlayer(
+          gameSettings.playerName
+        );
+
         if (isGameComplete) {
           await gameService.updatePlayerStats(player.id, {
             difficulty: diskCount as Difficulty,
@@ -177,10 +195,12 @@ const Game: React.FC = () => {
             completedAt: new Date(),
             optimalMoves: Math.pow(2, diskCount) - 1,
             moveEfficiency: (Math.pow(2, diskCount) - 1) / moves,
-            gameMode: GameMode.Dynamic
+            gameMode: GameMode.Dynamic,
           });
 
-          const updatedStats = await gameService.getPlayerStats(gameSettings.playerName);
+          const updatedStats = await gameService.getPlayerStats(
+            gameSettings.playerName
+          );
           if (updatedStats) {
             setDiskCount(0);
             setTimeout(() => setDiskCount(updatedStats.currentDifficulty), 0);
@@ -191,7 +211,7 @@ const Game: React.FC = () => {
         console.error("Error updating dynamic difficulty:", error);
       }
     }
-    
+
     const currentDiskCount = diskCount;
     setDiskCount(0);
     setTimeout(() => setDiskCount(currentDiskCount), 0);
@@ -205,7 +225,7 @@ const Game: React.FC = () => {
       setShowWinModal(false);
       setSelectedDisk(null);
       setIsGameComplete(false);
-      
+
       // Use requestAnimationFrame to ensure state updates are processed
       requestAnimationFrame(() => {
         setDiskCount(count);
@@ -217,7 +237,7 @@ const Game: React.FC = () => {
     if (gameSettings?.mode === GameMode.Arcade) {
       const suggestedMove = await aiService.getNextMove(towers);
       setHint(suggestedMove);
-      
+
       // Clear hint after 3 seconds
       setTimeout(() => setHint(null), 3000);
     }
@@ -274,34 +294,41 @@ const Game: React.FC = () => {
           showHintButton={gameSettings?.mode === GameMode.Arcade}
         />
 
-        <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start', position: 'relative' }}>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 3,
+            alignItems: "flex-start",
+            position: "relative",
+          }}
+        >
           <GameCanvas
             towers={towers}
             selectedDisk={selectedDisk}
             onDiskMove={handleDiskMove}
             hint={hint}
-            gameMode={gameSettings?.mode || GameMode.Arcade}           
+            gameMode={gameSettings?.mode || GameMode.Arcade}
           />
-          
+
           {gameSettings.mode === GameMode.Normal && (
-            <Box sx={{ position: 'relative' }}>
+            <Box sx={{ position: "relative" }}>
               <IconButton
                 onClick={() => setShowLeaderboard(!showLeaderboard)}
                 sx={{
-                  position: 'absolute',
+                  position: "absolute",
                   top: -50,
                   right: 0,
-                  color: 'primary.main',
-                  boxShadow: '0 0 10px #00e5ff',
-                  '&:hover': {
-                    color: 'secondary.main',
-                    boxShadow: '0 0 20px #ff0099'
-                  }
+                  color: "primary.main",
+                  boxShadow: "0 0 10px #00e5ff",
+                  "&:hover": {
+                    color: "secondary.main",
+                    boxShadow: "0 0 20px #ff0099",
+                  },
                 }}
               >
                 <LeaderboardIcon />
               </IconButton>
-              
+
               {showLeaderboard && gameSettings.difficulty && (
                 <Leaderboard
                   entries={leaderboardData}

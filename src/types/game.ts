@@ -64,7 +64,7 @@ export interface GameControls {
   onReset: () => void;
   onDiskCountChange: (count: number) => void;
   onUndo: () => void;
-  onBackToMenu: () => void;  // Add this line
+  onBackToMenu: () => void;  
   canUndo: boolean;
   gameMode: GameMode;
   playerName: string;
