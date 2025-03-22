@@ -2,7 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-  // Replace with your Firebase config
+ 
   apiKey: "AIzaSyBsvKB94suMGqf-jM9MDKz-aon687SSDzU",
   authDomain: "towers-of-hanoi-705f3.firebaseapp.com",
   projectId: "towers-of-hanoi-705f3",

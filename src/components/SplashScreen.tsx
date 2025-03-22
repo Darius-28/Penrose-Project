@@ -57,11 +57,48 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onStart }) => {
       bgcolor: 'background.paper',
       border: '1px solid',
       borderColor: 'primary.main',
-      boxShadow: '0 0 20px #00e5ff'
+      boxShadow: '0 0 20px #00e5ff',
+      transform: 'translateY(-10vh)',
     }}>
-      <Typography variant="h4" color="primary" sx={{ mb: 4, textAlign: 'center' }}>
-        Towers of Hanoi
-      </Typography>
+      <Typography 
+  variant="h4" 
+  sx={{ 
+    mb: 4, 
+    textAlign: 'center',
+    color: '#ff0099',
+    textShadow: `
+      0 0 7px #ff0099,
+      0 0 10px #ff0099,
+      0 0 21px #ff0099,
+      0 0 42px #ff0099,
+      0 0 82px #ff0099,
+      0 0 92px #ff0099
+    `,
+    animation: 'neonPulse 1.5s ease-in-out infinite alternate',
+    '@keyframes neonPulse': {
+      'from': {
+        textShadow: `
+          0 0 7px #ff0099,
+          0 0 10px #ff0099,
+          0 0 21px #ff0099,
+          0 0 42px #ff0099
+        `
+      },
+      'to': {
+        textShadow: `
+          0 0 7px #ff0099,
+          0 0 10px #ff0099,
+          0 0 21px #ff0099,
+          0 0 42px #ff0099,
+          0 0 82px #ff0099,
+          0 0 92px #ff0099
+        `
+      }
+    }
+  }}
+>
+  Towers of Hanoi
+</Typography>
 
       <TextField
         fullWidth
