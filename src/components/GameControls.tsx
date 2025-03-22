@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Button, Typography, Slider } from '@mui/material';
 import { GameControls as GameControlsProps, GameMode } from '../types/game';
+import LightbulbIcon from '@mui/icons-material/Lightbulb';
 
 const GameControls: React.FC<GameControlsProps> = ({
   moves,
@@ -13,7 +14,9 @@ const GameControls: React.FC<GameControlsProps> = ({
   canUndo,
   gameMode,
   playerName,
-  difficulty
+  difficulty,
+  onRequestHint,
+  showHintButton
 }) => {
 
   const getDifficultyName = (diff: number): string => {
@@ -113,6 +116,23 @@ const GameControls: React.FC<GameControlsProps> = ({
         >
           Undo Move
         </Button>
+
+        {showHintButton && (
+          <Button
+            onClick={onRequestHint}
+            variant="contained"
+            color="warning"
+            startIcon={<LightbulbIcon />}
+            sx={{
+              boxShadow: '0 0 10px #ff0099',
+              '&:hover': {
+                boxShadow: '0 0 20px #ff0099'
+              }
+            }}
+          >
+            AI Hint
+          </Button>
+        )}
       </Box>
 
       {gameMode === GameMode.Arcade && (

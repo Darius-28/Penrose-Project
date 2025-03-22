@@ -14,8 +14,9 @@ import { WinModal } from "./WinModal";
 import { SplashScreen } from "./SplashScreen";
 import { Leaderboard } from "./Leaderboard";
 import useGameLogic from "../hooks/useGameLogic";
-import { GameSettings, GameMode, Difficulty, GameResult, LeaderboardEntry } from "../types/game";
+import { GameSettings, GameMode, Difficulty, GameResult, LeaderboardEntry, Move } from "../types/game";
 import { gameService } from "../services/gameService";
+import { aiService } from "../services/aiService";
 
 const theme = createTheme({
   palette: {
@@ -40,6 +41,7 @@ const Game: React.FC = () => {
   const [showWinModal, setShowWinModal] = useState<boolean>(false);
   const [showLeaderboard, setShowLeaderboard] = useState<boolean>(false);
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
+  const [hint, setHint] = useState<Move | null>(null);
 
   useEffect(() => {
     if (gameSettings) {
@@ -208,6 +210,16 @@ const Game: React.FC = () => {
     }
   };
 
+  const handleRequestHint = async () => {
+    if (gameSettings?.mode === GameMode.Arcade) {
+      const suggestedMove = await aiService.getNextMove(towers);
+      setHint(suggestedMove);
+      
+      // Clear hint after 3 seconds
+      setTimeout(() => setHint(null), 3000);
+    }
+  };
+
   if (!gameSettings) {
     return (
       <ThemeProvider theme={theme}>
@@ -255,6 +267,8 @@ const Game: React.FC = () => {
           gameMode={gameSettings.mode}
           playerName={gameSettings.playerName}
           difficulty={gameSettings.difficulty}
+          onRequestHint={handleRequestHint}
+          showHintButton={gameSettings?.mode === GameMode.Arcade}
         />
 
         <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start', position: 'relative' }}>
@@ -262,6 +276,8 @@ const Game: React.FC = () => {
             towers={towers}
             selectedDisk={selectedDisk}
             onDiskMove={handleDiskMove}
+            hint={hint}
+            gameMode={gameSettings?.mode || GameMode.Arcade}           
           />
           
           {gameSettings.mode === GameMode.Normal && (

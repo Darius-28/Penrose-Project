@@ -69,12 +69,16 @@ export interface GameControls {
   gameMode: GameMode;
   playerName: string;
   difficulty?: Difficulty; 
+  onRequestHint?: () => void;
+  showHintButton?: boolean;
 }
 
 export interface CanvasProps {
   towers: Towers;
   selectedDisk: SelectedDisk | null;
   onDiskMove: (fromTower: number, toTower: number) => void;
+  hint: Move | null;
+  gameMode: GameMode;
 }
 
 export interface WinModalProps {

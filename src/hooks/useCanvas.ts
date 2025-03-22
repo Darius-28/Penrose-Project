@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
-import { CanvasProps } from '../types/game';
+import { CanvasProps, GameMode } from '../types/game';
 
 const diskColors = [
   '#00e5ff', // cyan
@@ -19,9 +19,16 @@ interface DragState {
   dragY: number;
 }
 
-export const useCanvas = ({ towers, selectedDisk, onDiskMove }: CanvasProps) => {
+export const useCanvas = ({ 
+  towers, 
+  selectedDisk, 
+  onDiskMove, 
+  hint, 
+  gameMode 
+}: CanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [dragState, setDragState] = useState<DragState | null>(null);
+
 
   const drawTowers = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -81,8 +88,17 @@ export const useCanvas = ({ towers, selectedDisk, onDiskMove }: CanvasProps) => 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    drawTowers(ctx, canvas);
-  }, [towers, dragState]);
+    const render = () => {
+      drawTowers(ctx, canvas);
+      if (hint) drawHint(ctx, canvas);
+      requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => cancelAnimationFrame(render as unknown as number);
+  }, [towers, dragState, hint, gameMode]);
+
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -135,6 +151,29 @@ export const useCanvas = ({ towers, selectedDisk, onDiskMove }: CanvasProps) => 
 
     setDragState(null);
   };
+
+  const drawHint = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
+    if (!hint || gameMode !== GameMode.Arcade) return;
+
+    const time = Date.now();
+    const alpha = (Math.sin(time / 200) + 1) / 2;
+
+    ctx.globalAlpha = alpha;
+    
+    const sourceTower = hint.fromTower;
+    const disk = towers[sourceTower][towers[sourceTower].length - 1];
+    const targetX = (hint.toTower + 1) * (canvas.width / 4);
+    const targetY = 380 - (towers[hint.toTower].length * 30);
+    const width = disk * 30;
+    
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = '#ffff00';
+    ctx.fillStyle = '#ffff00';
+    ctx.fillRect(targetX - width/2, targetY, width, 20);
+    
+    ctx.globalAlpha = 1;
+  };
+
 
   return {
     canvasRef,
