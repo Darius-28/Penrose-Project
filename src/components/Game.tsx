@@ -52,11 +52,18 @@ const Game: React.FC = () => {
       setDiskCount(0);
       
       // Wait for state to clear, then set new disk count
-      const timer = setTimeout(() => {
-        if (gameSettings.mode === GameMode.Normal && gameSettings.difficulty) {
+      const timer = setTimeout(async () => {
+        if (gameSettings.mode === GameMode.Dynamic) {
+          try {
+            const player = await gameService.getOrCreatePlayer(gameSettings.playerName);
+            const stats = await gameService.getPlayerStats(gameSettings.playerName);
+            setDiskCount(stats?.currentDifficulty || Difficulty.Easy);
+          } catch (error) {
+            console.error("Error fetching player stats:", error);
+            setDiskCount(Difficulty.Easy);
+          }
+        } else if (gameSettings.mode === GameMode.Normal && gameSettings.difficulty) {
           setDiskCount(Number(gameSettings.difficulty));
-        } else if (gameSettings.mode === GameMode.Dynamic) {
-          setDiskCount(Number(Difficulty.Easy));
         } else {
           setDiskCount(3);
         }
@@ -65,6 +72,7 @@ const Game: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [gameSettings]);
+
 
   const {
     towers,
@@ -106,7 +114,7 @@ const Game: React.FC = () => {
   useEffect(() => {
     if (isGameComplete && gameSettings) {
       const result: GameResult = {
-        difficulty: gameSettings.difficulty || Difficulty.Easy,
+        difficulty: gameSettings.difficulty || diskCount as Difficulty,
         moves,
         time,
         completedAt: new Date(),
@@ -121,10 +129,13 @@ const Game: React.FC = () => {
         gameService
           .saveGameResult(gameSettings.playerName, result)
           .then(() => gameService.getLeaderboard(gameSettings.difficulty!))
-          .then((updatedLeaderboard) => {
-            setLeaderboardData(updatedLeaderboard);
-          })
-          .catch((error) => console.error("Failed to save game result:", error));
+          .then(setLeaderboardData)
+          .catch(console.error);
+      } else if (gameSettings.mode === GameMode.Dynamic) {
+        gameService
+          .getOrCreatePlayer(gameSettings.playerName)
+          .then(player => gameService.updatePlayerStats(player.id, result))
+          .catch(console.error);
       }
     }
   }, [isGameComplete, gameSettings, moves, time, diskCount]);
@@ -143,11 +154,39 @@ const Game: React.FC = () => {
     }
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     setShowWinModal(false);
     setTime(0);
     setSelectedDisk(null);
     setIsGameComplete(false);
+
+    if (gameSettings?.mode === GameMode.Dynamic) {
+      try {
+        const player = await gameService.getOrCreatePlayer(gameSettings.playerName);
+        
+        if (isGameComplete) {
+          await gameService.updatePlayerStats(player.id, {
+            difficulty: diskCount as Difficulty,
+            moves,
+            time,
+            completedAt: new Date(),
+            optimalMoves: Math.pow(2, diskCount) - 1,
+            moveEfficiency: (Math.pow(2, diskCount) - 1) / moves,
+            gameMode: GameMode.Dynamic
+          });
+
+          const updatedStats = await gameService.getPlayerStats(gameSettings.playerName);
+          if (updatedStats) {
+            setDiskCount(0);
+            setTimeout(() => setDiskCount(updatedStats.currentDifficulty), 0);
+            return;
+          }
+        }
+      } catch (error) {
+        console.error("Error updating dynamic difficulty:", error);
+      }
+    }
+    
     const currentDiskCount = diskCount;
     setDiskCount(0);
     setTimeout(() => setDiskCount(currentDiskCount), 0);
