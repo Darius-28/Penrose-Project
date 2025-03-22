@@ -45,10 +45,7 @@ export const useDragAndDrop = (
 
     const canvas = e.currentTarget;
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    
-    // Update disk position for visual feedback
-    // This will be handled in the useCanvas hook
+    const x = e.clientX - rect.left;    
   };
 
   const handleDragEnd = (e: React.MouseEvent<HTMLCanvasElement>) => {

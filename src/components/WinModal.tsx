@@ -37,8 +37,8 @@ export const WinModal: React.FC<WinModalProps> = ({
       <DialogTitle 
         sx={{ 
           textAlign: 'center', 
-          color: 'primary.main',
-          textShadow: '0 0 10px #00e5ff',
+          color: '#ff0099',
+          textShadow: '0 0 10px #ff0099',
           fontWeight: 'bold'
         }}
       >
@@ -52,17 +52,44 @@ export const WinModal: React.FC<WinModalProps> = ({
             textShadow: '0 0 10px #00e5ff',
             fontWeight: 'bold',
             mb: 1
+          },
+          '& .label': {
+            color: '#ff0099',
+            textShadow: '0 0 10px #ff0099',
+            display: 'inline'
+          },
+          '& .value': {
+            color: '#00e5ff',
+            textShadow: '0 0 10px #00e5ff',
+            display: 'inline',
+            ml: 1
           }
         }}>
           <Typography variant="h6" gutterBottom>
-            Mode: {gameMode}
-            {difficulty && ` - Difficulty: ${difficulty}`}
-          </Typography>
-          <Typography>Time: {time}</Typography>
-          <Typography>Moves: {moves}</Typography>
-          <Typography>Optimal moves: {optimalMoves}</Typography>
+      <span className="label">Mode:</span>
+      <span className="value">{gameMode}</span>
+      {difficulty && (
+        <>
+          <span className="label"> - Difficulty: </span>
+          <span className="value">{difficulty}</span>
+        </>
+      )}
+    </Typography>
+    <Typography>
+      <span className="label">Time: </span>
+      <span className="value">{time}</span>
+    </Typography>
+    <Typography>
+      <span className="label">Moves: </span>
+      <span className="value">{moves}</span>
+    </Typography>
+    <Typography>
+      <span className="label">Optimal moves: </span>
+      <span className="value">{optimalMoves}</span>
+    </Typography>
           <Typography>
-            Efficiency: {(moveEfficiency * 100).toFixed(1)}%
+           <span className='label'> Efficiency: </span>
+           <span className='value'> {(moveEfficiency * 100).toFixed(1)}%</span>
           </Typography>
         </Box>
       </DialogContent>

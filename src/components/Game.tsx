@@ -53,7 +53,7 @@ const Game: React.FC = () => {
       setShowLeaderboard(false);
       setDiskCount(0);
       
-      // Wait for state to clear, then set new disk count
+      // Sets new disk counts for dynamic mode
       const timer = setTimeout(async () => {
         if (gameSettings.mode === GameMode.Dynamic) {
           try {
@@ -98,6 +98,7 @@ const Game: React.FC = () => {
     setShowLeaderboard(false);
   };
 
+  // Effect for updating the time every second
   useEffect(() => {
     if (!isGameComplete) {
       const timer = setInterval(() => setTime((prev) => prev + 1), 1000);
@@ -105,6 +106,7 @@ const Game: React.FC = () => {
     }
   }, [isGameComplete]);
 
+  // Effect for fetching leaderboard data
   useEffect(() => {
     if (gameSettings?.mode === GameMode.Normal && gameSettings.difficulty) {
       gameService.getLeaderboard(gameSettings.difficulty)
@@ -113,6 +115,7 @@ const Game: React.FC = () => {
     }
   }, [gameSettings?.mode, gameSettings?.difficulty]);
 
+  // Effect for saving game result and showing win modal
   useEffect(() => {
     if (isGameComplete && gameSettings) {
       const result: GameResult = {

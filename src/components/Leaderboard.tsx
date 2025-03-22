@@ -8,7 +8,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Box,
 } from "@mui/material";
 import { LeaderboardEntry } from "../types/game";
 

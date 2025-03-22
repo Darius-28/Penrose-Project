@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Box,
   Paper,
   Typography,
   TextField,
@@ -11,7 +10,8 @@ import {
   FormControl,
   Select,
   MenuItem,
-  InputLabel
+  InputLabel,
+  Box
 } from '@mui/material';
 import { GameMode, Difficulty, GameSettings } from '../types/game';
 
@@ -39,10 +39,21 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onStart }) => {
   };
 
   return (
+    
+    <Box
+    sx={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '100vh',
+      width: '100%',
+      bgcolor: 'rgba(18, 18, 18, 0)',
+    }}
+  >
     <Paper elevation={3} sx={{
       p: 4,
       maxWidth: 500,
-      mx: 'auto',
+      width: '90%',
       bgcolor: 'background.paper',
       border: '1px solid',
       borderColor: 'primary.main',
@@ -70,7 +81,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onStart }) => {
           <FormControlLabel 
             value={GameMode.Arcade} 
             control={<Radio />} 
-            label="Arcade Mode - Practice with any number of disks"
+            label="Arcade Mode - Practice with any number of disks with AI generated hints"
           />
           <FormControlLabel 
             value={GameMode.Normal} 
@@ -116,5 +127,6 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onStart }) => {
         Start Game
       </Button>
     </Paper>
+    </Box>
   );
 };
