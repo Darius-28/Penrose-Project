@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Towers, SelectedDisk, Move } from '../types/game';
+import { soundService } from '../services/soundService';
 
 interface GameLogic {
   towers: Towers;
@@ -69,9 +70,13 @@ const useGameLogic = (diskCount: number): GameLogic => {
   };
 
   const moveDisk = (fromTower: number, toTower: number): void => {
-    if (!isValidMove(fromTower, toTower)) return;
+    if (!isValidMove(fromTower, toTower)) {
+      soundService.playError();
+      return;
+    }
 
     const disk = towers[fromTower][towers[fromTower].length - 1];
+    soundService.playPlace();
     
     setTowers(prev => {
       const newTowers = prev.map(tower => [...tower]) as Towers;

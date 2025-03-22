@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import { CanvasProps, GameMode } from '../types/game';
+import { soundService } from '../services/soundService';
 
 const diskColors = [
   '#00e5ff', // cyan
@@ -21,7 +22,6 @@ interface DragState {
 
 export const useCanvas = ({ 
   towers, 
-  selectedDisk, 
   onDiskMove, 
   hint, 
   gameMode 
@@ -72,7 +72,6 @@ export const useCanvas = ({
     // Draw dragged disk
     if (dragState?.isDragging) {
       const width = dragState.draggedDisk * 30;
-      const diskColor = diskColors[dragState.draggedDisk - 1] || diskColors[0];
       
       ctx.shadowBlur = 15;
       ctx.shadowColor = '#ffff00';
@@ -111,6 +110,7 @@ export const useCanvas = ({
     const tower = towers[towerIndex];
     if (tower.length === 0) return;
 
+    soundService.playClick();
     const topDisk = tower[tower.length - 1];
     setDragState({
       isDragging: true,

@@ -24,6 +24,8 @@ import {
 } from "../types/game";
 import { gameService } from "../services/gameService";
 import { aiService } from "../services/aiService";
+import { soundService } from "../services/soundService";
+import { MusicNote, MusicOff, VolumeUp, VolumeOff } from "@mui/icons-material";
 
 const theme = createTheme({
   palette: {
@@ -51,6 +53,9 @@ const Game: React.FC = () => {
     []
   );
   const [hint, setHint] = useState<Move | null>(null);
+  const [isMusicOn, setIsMusicOn] = useState(true);
+  const [isSoundOn, setIsSoundOn] = useState(true);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   useEffect(() => {
     if (gameSettings) {
@@ -134,6 +139,7 @@ const Game: React.FC = () => {
   // Effect for saving game result and showing win modal
   useEffect(() => {
     if (isGameComplete && gameSettings) {
+      soundService.playVictory();
       const result: GameResult = {
         difficulty: gameSettings.difficulty || (diskCount as Difficulty),
         moves,
@@ -160,6 +166,35 @@ const Game: React.FC = () => {
       }
     }
   }, [isGameComplete, gameSettings, moves, time, diskCount]);
+
+  useEffect(() => {
+    if (hasInteracted && isMusicOn) {
+      soundService.startBackgroundMusic();
+    }
+    return () => soundService.stopBackgroundMusic();
+  }, [hasInteracted, isMusicOn]);
+
+  // Add interaction handler
+  useEffect(() => {
+    const handleInteraction = () => {
+      setHasInteracted(true);
+      window.removeEventListener('click', handleInteraction);
+    };
+
+    window.addEventListener('click', handleInteraction);
+    return () => window.removeEventListener('click', handleInteraction);
+  }, []);
+
+  const toggleMusic = () => {
+    setIsMusicOn(!isMusicOn);
+    soundService.toggleMusic();
+    setHasInteracted(true);
+  };
+
+const toggleSound = () => {
+    setIsSoundOn(!isSoundOn);
+    soundService.toggleSound();
+};
 
   const formatTime = (seconds: number): string => {
     if (seconds < 60) return `${seconds}s`;
@@ -266,6 +301,34 @@ const Game: React.FC = () => {
           gap: 3,
         }}
       >
+         <Box sx={{
+          position: 'absolute',
+          top: 16,
+          right: 16,
+          zIndex: 1000,
+          display: 'flex',
+          gap: 1
+        }}>
+          <IconButton 
+            onClick={toggleMusic}
+            sx={{ 
+              color: '#00e5ff',
+              '&:hover': { color: '#ff0099' }
+            }}
+          >
+            {isMusicOn ? <MusicNote /> : <MusicOff />}
+          </IconButton>
+          <IconButton 
+            onClick={toggleSound}
+            sx={{ 
+              color: '#00e5ff',
+              '&:hover': { color: '#ff0099' }
+            }}
+          >
+            {isSoundOn ? <VolumeUp /> : <VolumeOff />}
+          </IconButton>
+        </Box>
+        
         <Typography
           variant="h2"
           color="primary"
